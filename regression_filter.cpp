@@ -14,20 +14,18 @@ float poly_1dim_filter(float raw_v){
 
     // 1. Case for full history
     if(arr_len > history_size){
-        for(int i=1; i<history_size; i++){
-            sum_xy += prev_v_arr[i]*i;
-            sum_y += prev_v_arr[i];
-        }
-        sum_xy += raw_v*history_size;
-        sum_y += raw_v;
-
-        a = ( history_size * sum_xy - sum_x * sum_y ) / ( history_size * sum_xx - sum_x * sum_x);
-        b = ( sum_y * sum_xx - sum_xy * sum_x ) / ( history_size * sum_xx - sum_x * sum_x);
-
         for(int i=0; i<history_size-1; i++){
             prev_v_arr[i] = prev_v_arr[i+1];
         }
         prev_v_arr[history_size-1] = raw_v;
+
+        for(int i=0; i<history_size; i++){
+            sum_xy += prev_v_arr[i]*(i+1);
+            sum_y += prev_v_arr[i];
+        }
+
+        a = ( history_size * sum_xy - sum_x * sum_y ) / ( history_size * sum_xx - sum_x * sum_x);
+        b = ( sum_y * sum_xx - sum_xy * sum_x ) / ( history_size * sum_xx - sum_x * sum_x);
 
         return a*history_size+b;
     }
@@ -35,17 +33,15 @@ float poly_1dim_filter(float raw_v){
     else if(arr_len > 1){
         sum_xx += arr_len * arr_len;
         sum_x += arr_len;
+        prev_v_arr[arr_len-1] = raw_v;
 
-        for(int i=1; i < arr_len; i++){
-            sum_xy += prev_v_arr[i-1]*i;
-            sum_y += prev_v_arr[i-1];
+        for(int i=0; i < arr_len; i++){
+            sum_xy += prev_v_arr[i]*(i+1);
+            sum_y += prev_v_arr[i];
         }
-        sum_xy += raw_v*arr_len;
-        sum_y += raw_v;
 
         a = ( arr_len * sum_xy - sum_x * sum_y ) / ( arr_len * sum_xx - sum_x * sum_x);
         b = ( sum_y * sum_xx - sum_xy * sum_x ) / ( arr_len * sum_xx - sum_x * sum_x);
-        prev_v_arr[arr_len-1] = raw_v;
 
         return a*arr_len+b;
     }
