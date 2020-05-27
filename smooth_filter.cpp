@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <iostream>
 
-int pool_num;
+int history_num;
 int arr_len;
 float* prev_v_arr;
 float to_be_popped_idx = -1;
@@ -13,23 +13,23 @@ float poly_1dim_filter(float raw_v){
     float xy = 0;
     float sum_y = 0;
 
-    if(arr_len > pool_num){
-        for(int i=1; i<pool_num; i++){
+    if(arr_len > history_num){
+        for(int i=1; i<history_num; i++){
             xy += prev_v_arr[i]*i;
             sum_y += prev_v_arr[i];
         }
-        xy += raw_v*pool_num;
+        xy += raw_v*history_num;
         sum_y += raw_v;
 
-        a = ( pool_num * xy - sum_x * sum_y ) / ( pool_num * xx - sum_x * sum_x);
-        b = ( sum_y * xx - xy * sum_x ) / ( pool_num * xx - sum_x * sum_x);
+        a = ( history_num * xy - sum_x * sum_y ) / ( history_num * xx - sum_x * sum_x);
+        b = ( sum_y * xx - xy * sum_x ) / ( history_num * xx - sum_x * sum_x);
 
-        for(int i=0; i<pool_num-1; i++){
+        for(int i=0; i<history_num-1; i++){
             prev_v_arr[i] = prev_v_arr[i+1];
         }
-        prev_v_arr[pool_num-1] = a*pool_num+b;
+        prev_v_arr[history_num-1] = a*history_num+b;
 
-        return a*pool_num+b;
+        return a*history_num+b;
     }
     else if(arr_len > 1){
         float temp_xx = 0;
@@ -59,7 +59,7 @@ float poly_1dim_filter(float raw_v){
 
 int main(int argc, char **argv){
     if(argc != 4){
-        printf("Usage : ./smoothing <raw file> <output file> <pool_num>\n");
+        printf("Usage : ./smoothing <raw file> <output file> <history_num>\n");
         return 1;
     }
 
@@ -71,10 +71,10 @@ int main(int argc, char **argv){
         return 1;
     }
 
-    pool_num = atoi(argv[3]);
-    prev_v_arr = (float *)malloc(sizeof(float) * pool_num);
+    history_num = atoi(argv[3]);
+    prev_v_arr = (float *)malloc(sizeof(float) * history_num);
 
-    for(int i=1; i<=pool_num; i++){
+    for(int i=1; i<=history_num; i++){
         sum_x += i;
         xx += i*i;
     }
@@ -83,7 +83,7 @@ int main(int argc, char **argv){
     float v;
 
     while(fscanf(raw_file, "%f", &v) != EOF){
-        if(arr_len <= pool_num) arr_len++;
+        if(arr_len <= history_num) arr_len++;
         //fprintf(filtered_file, "%f\t%f\n", v, poly_1dim_filter(v))
         fprintf(filtered_file, "%f\n", poly_1dim_filter(v));
     }
