@@ -58,13 +58,20 @@ float poly_1dim_filter(float raw_v){
 }
 
 int main(int argc, char **argv){
-    if(argc != 2){
-        printf("Usage : ./filter <pool_num>\n");
+    if(argc != 4){
+        printf("Usage : ./smoothing <raw file> <output file> <pool_num>\n");
         return 1;
     }
 
-    pool_num = atoi(argv[1]);
-    //prev_v_arr = new float[pool_num];
+    FILE* raw_file = fopen(argv[1], "r");
+    FILE* filtered_file = fopen(argv[2], "w");
+
+    if(raw_file == NULL){
+        printf("File doesn't exists!");
+        return 1;
+    }
+
+    pool_num = atoi(argv[3]);
     prev_v_arr = (float *)malloc(sizeof(float) * pool_num);
 
     for(int i=1; i<=pool_num; i++){
@@ -72,15 +79,13 @@ int main(int argc, char **argv){
         xx += i*i;
     }
 
-    FILE* raw_file = fopen("raw.txt", "r");
-    FILE* filtered_file = fopen("filtered.txt", "w");
-
     char buffer[255];
     float v;
 
     while(fscanf(raw_file, "%f", &v) != EOF){
-        if(arr_len < pool_num) arr_len++;
-        fprintf(filtered_file, "%f\t%f\n", v, poly_1dim_filter(v));
+        if(arr_len <= pool_num) arr_len++;
+        //fprintf(filtered_file, "%f\t%f\n", v, poly_1dim_filter(v))
+        fprintf(filtered_file, "%f\n", poly_1dim_filter(v));
     }
 
     // while(!feof(raw_file)){
